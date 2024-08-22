@@ -1,6 +1,7 @@
 import { DataSource } from 'typeorm';
-import { User } from '../users/user.entity';
+import { User } from '../module/users/user.entity';
 import { config } from 'dotenv';
+import {Boards} from "../module/boards/boards.entity";
 
 // .env 파일의 내용을 환경 변수로 로드
 config();
@@ -22,7 +23,7 @@ export const AppDataSource = new DataSource({
     username: getEnvVariable('DB_USERNAME'),
     password: getEnvVariable('DB_PASSWORD'),
     database: getEnvVariable('DB_DATABASE'),
-    entities: [User],  // 엔티티를 명시적으로 지정하거나, glob 패턴을 사용하여 여러 엔티티를 포함 가능
+    entities: [User, Boards],  // 엔티티를 명시적으로 지정하거나, glob 패턴을 사용하여 여러 엔티티를 포함 가능
     synchronize: process.env.DB_SYNCHRONIZE === 'true',
     logging: process.env.DB_LOGGING === 'true',
 });
