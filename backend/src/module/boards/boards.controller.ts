@@ -3,6 +3,8 @@ import {BoardsService} from "./boards.service";
 import {Boards} from "./boards.entity";
 import {PageResult} from "../../type/pagenation/PageResult";
 import {PageRequest} from "../../type/pagenation/PageRequest";
+import {BoardRequest} from "../../type/board/BoardRequest";
+import {BoardResponse} from "../../type/board/BoardResponse";
 
 @Controller('boards')
 export class BoardsController {
@@ -14,19 +16,19 @@ export class BoardsController {
         @Query('size') size: number = 10,
         @Query('field') field: string = 'id',
         @Query('sort') sort: 'ASC' | 'DESC' = 'DESC'
-    ): Promise<PageResult<Boards>> {
+    ): Promise<PageResult<BoardResponse>> {
         const pageReq : PageRequest = { page, size, field, sort };
         return this.boardsService.findMany(pageReq);
     }
 
     @Get(':id')
-    findOne(@Param('id') id: number): Promise<Boards>{
+    findOne(@Param('id') id: number): Promise<BoardResponse>{
         return this.boardsService.findOne(id);
     }
 
     @Post()
-    createBoard(@Body() board: Omit<Boards, 'id'>): Promise<Boards> {
-        return this.boardsService.create(board);
+    createBoard(@Body() req: BoardRequest): Promise<BoardResponse> {
+        return this.boardsService.create(req);
     }
 
     @Delete(':id')

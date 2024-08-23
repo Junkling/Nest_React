@@ -3,6 +3,7 @@ import {InjectRepository} from "@nestjs/typeorm";
 import {User} from "./user.entity";
 import {Repository} from "typeorm";
 import {orElseThrow} from "../../db/utils";
+import {UserRequest} from "../../type/user/UserRequest";
 
 @Injectable()
 export class UsersService {
@@ -21,7 +22,7 @@ export class UsersService {
         await this.userRepository.delete(id);
     }
 
-    async create(user: User): Promise<User> {
+    async create(user: UserRequest): Promise<User> {
         return this.userRepository.save(user);
     }
 }

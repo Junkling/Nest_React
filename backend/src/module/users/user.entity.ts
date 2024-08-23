@@ -15,14 +15,14 @@ export class User {
     @Column()
     introduce!: string;
 
-    @OneToMany(type => Boards, (boards) => boards.user)
-    boardList: Boards[];
+    // @OneToMany(type => Boards, (boards) => boards.user)
+    // boardList: Boards[];
 
     constructor(id: number, name: string, age: number) {
         this.id = id;
         this.name = name;
         this.age = age;
-        this.boardList = [];
+        // this.boardList = [];
     }
 
 }

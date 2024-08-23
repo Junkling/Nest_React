@@ -4,7 +4,7 @@ import {User} from "../users/user.entity";
 @Entity('boards')
 export class Boards {
     @PrimaryGeneratedColumn()
-    id: number;
+    id?: number;
 
     @Column()
     title: string;
@@ -13,10 +13,9 @@ export class Boards {
     description: string;
 
     @ManyToOne(type => User, (user) => user.id)
-    user?: User;
+    user: User | null;
 
-    constructor(id: number, title: string, description: string , user?: User) {
-        this.id = id;
+    constructor(title: string, description: string, user: User | null) {
         this.title = title;
         this.description = description;
         this.user = user;
