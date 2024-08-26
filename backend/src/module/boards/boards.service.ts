@@ -7,7 +7,7 @@ import {PageRequest, toFindOption} from "../../type/pagenation/PageRequest";
 import {PageResult} from "../../type/pagenation/PageResult";
 import {User} from "../users/user.entity";
 import {BoardRequest} from "../../type/board/BoardRequest";
-import {BoardResponse} from "../../type/board/BoardResponse";
+import {BoardResponse, toBoardResponse} from "../../type/board/BoardResponse";
 
 @Injectable()
 export class BoardsService {
@@ -24,7 +24,8 @@ export class BoardsService {
 
     private async findAll(): Promise<PageResult<BoardResponse>> {
         console.log(`[findAll] : size = 0`)
-        const data = await this.boardRepository.find();
+        const boards = await this.boardRepository.find({ relations: ['user'] }); // 관계 로드
+        const data = boards.map(toBoardResponse); // 엔티티를 응답 타입으로 변환
         const page = 0;
         const totalPages = 0;
         const totalCount = data.length;
@@ -33,7 +34,11 @@ export class BoardsService {
 
     private async findAllByPage(pageReq: PageRequest): Promise<PageResult<BoardResponse>> {
         console.log(`[findAllByPage] : size = ${pageReq.size}, page = ${pageReq.page}`);
-        const [data, count] = await this.boardRepository.findAndCount(toFindOption(pageReq));
+        const [boards, count] = await this.boardRepository.findAndCount({
+            ...toFindOption(pageReq),
+            relations: ['user'],
+        });
+        const data = boards.map(toBoardResponse); // 엔티티를 응답 타입으로 변환
         const page = pageReq.page;
         const totalCount = count;
         const totalPages = Math.ceil(totalCount / pageReq.size);
@@ -41,13 +46,19 @@ export class BoardsService {
     }
 
     async findOne(id: number): Promise<BoardResponse> {
-        return orElseThrow(await this.boardRepository.findOne({where: {id}}), () => new NotFoundException('해당 게시물을 찾지 못했습니다.'));
+        const boards = orElseThrow(
+            await this.boardRepository.findOne({ where: { id }, relations: ['user'] }), // user 관계 로드 추가
+            () => new NotFoundException('해당 게시물을 찾지 못했습니다.')
+        );
+        return toBoardResponse(boards);
     }
+
 
 
     async create(req: BoardRequest): Promise<BoardResponse> {
         const user = await this.userRepository.findOne({where: {id: req.userId}});
-        return this.boardRepository.save(new Boards(req.title, req.description, user));
+        if(!user){throw Error("유저 정보가 없습니다.")}
+        return toBoardResponse(await this.boardRepository.save(new Boards(req.title, req.description, user)));
     }
 
     async remove(id: number): Promise<void> {

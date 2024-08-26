@@ -18,11 +18,16 @@ export class UsersController {
     }
 
     @Post()
-    create(@Body() user: UserRequest): Promise<UserResponse> {
-        return this.usersService.create(user);
+    create(@Body() req: UserRequest): Promise<UserResponse> {
+        return this.usersService.create(req);
     }
     @Delete(':id')
     remove(@Param('id') id: number): Promise<void> {
         return this.usersService.remove(id);
+    }
+
+    @Post('/login')
+    login(@Body() req: LoginRequest): Promise<UserResponse> {
+        return this.usersService.login(req);
     }
 }

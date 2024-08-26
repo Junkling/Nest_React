@@ -17,7 +17,7 @@ const UserList: React.FC<UserListProps> = React.memo(({ users }) => {
         <ul>
             {users.map(user => (
                 <li key={user.id} onClick={() => handleUserClick(user.id)}>
-                    {user.name} ({user.age})
+                    {user.name} ({user.age}) [글 작성 수]: {user.boardIdsList.length}
                 </li>
             ))}
         </ul>
