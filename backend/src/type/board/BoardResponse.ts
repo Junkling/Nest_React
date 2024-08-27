@@ -9,7 +9,7 @@ export interface BoardResponse {
 
     description: string;
 
-    userResponse: UserResponse | null;
+    userResponse: Omit<UserResponse,'boardIdsList'> | null;
 }
 
 export function toBoardResponse(entity: Boards): BoardResponse {
@@ -17,6 +17,9 @@ export function toBoardResponse(entity: Boards): BoardResponse {
     const title = entity.getTitle();
     const description = entity.getDescription();
     const user = entity.getUser();
-    const userResponse = toUserResponse(user);
+    let userResponse = null;
+    if (user) {
+        userResponse = toUserResponse(user);
+    }
     return {id, title, description, userResponse}
 }

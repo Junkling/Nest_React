@@ -37,7 +37,7 @@ export class UsersService {
     }
 
     async login(req: LoginRequest): Promise<UserResponse> {
-        const user = await orElseThrow(this.userRepository.findOne({where: {username: req.username}, relations: ['boardList']}), () => new NotFoundException(`해당 리소스를 찾지 못했습니다.`));
+        const user = await orElseThrow(this.userRepository.findOne({where: {username: req.username},relations: ['boardList']}), () => new NotFoundException(`해당 리소스를 찾지 못했습니다.`));
         if (user?.getPassword() != req.password) {
             throw new Error('비밀번호가 일치하지 않습니다.');
         }

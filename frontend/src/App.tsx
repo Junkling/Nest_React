@@ -6,6 +6,8 @@ import NotFound from "./pages/error/NotFound";
 import Navigation from "./components/navigation/Navigation";
 import ChatComponent_V1 from "./pages/chat/ChatComponent_V1";
 import LoginComponent from "./components/login/LoginComponent";
+import PrivateChat from "./pages/chat/PrivateChat";
+import Boards from "./pages/boards/Boards";
 
 const App: React.FC = () => {
     return (
@@ -16,6 +18,8 @@ const App: React.FC = () => {
                 <Route path="/login" element={<LoginComponent />} />
                 <Route path="/users/:id" element={<UserDetail />} />
                 <Route path="/chat1" element={<ChatComponent_V1 />} />
+                <Route path="/boards" element={<Boards />} />
+                <Route path="/chat/private/:boardId" element={<PrivateChat />} /> {/* 게시물 작성자와 1대1 채팅 */}
                 <Route path="/not-found" element={<NotFound />} />
                 <Route path="*" element={<NotFound />} />
             </Routes>

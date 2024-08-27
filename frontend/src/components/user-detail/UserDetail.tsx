@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import {fetchUserById} from "../../apis/apiService";
-import navigation from "../navigation/Navigation";
 import NotFound from "../../pages/error/NotFound";
+import {apiService} from "../../apis/apiService";
 
 // User 타입 정의
 interface User {
@@ -16,32 +15,43 @@ const UserDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>(); // URL에서 유저 ID를 추출
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null); // 에러 메시지 상태
 
     useEffect(() => {
-        // 예제 API 호출 (실제로는 백엔드 API를 호출하는 로직을 작성)
         const fetchUser = async () => {
             try {
-                // API 요청 예시 (백엔드와의 통신 부분)
-                if (id == null) {
-                    return new Error("아이디는 필수 값입니다.")
+                if (!id) {
+                    throw new Error("아이디는 필수 값입니다.");
                 }
-                const response = await fetchUserById(parseInt(id, 10));
+
+                const userId = parseInt(id, 10);
+                if (isNaN(userId)) {
+                    throw new Error("유효하지 않은 아이디입니다.");
+                }
+
+                const response = await apiService.fetchUserById(userId);
                 setUser(response);
             } catch (error) {
-                console.error('유저정보를 찾지 못했습니다.:', error);
+                setError(error instanceof Error ? error.message : "유저 정보를 찾지 못했습니다.");
+                console.error('유저 정보를 찾지 못했습니다:', error);
             } finally {
                 setLoading(false);
             }
         };
-        fetchUser()
+
+        fetchUser();
     }, [id]);
 
     if (loading) {
         return <p>Loading...</p>;
     }
 
+    if (error) {
+        return <p>{error}</p>;
+    }
+
     if (!user) {
-       return <NotFound />
+        return <NotFound />;
     }
 
     return (

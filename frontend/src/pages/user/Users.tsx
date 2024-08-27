@@ -1,14 +1,14 @@
 import React, {Component, useEffect, useState} from 'react';
 import {User} from "../../types/User";
-import {addUser, fetchUsers} from "../../apis/apiService";
 import UserList from "../../components/user-list/UserList";
 import UserForm from "../../components/user-form/UserForm";
+import {apiService} from "../../apis/apiService";
 
 const Users = () =>{
     const [users, setUsers] = useState<User[]>([]);
 
     useEffect(() => {
-        fetchUsers()
+        apiService.fetchUsers()
             .then(setUsers)
             .catch(error => {
                 console.error('유저 세팅 오류', error);
@@ -16,7 +16,7 @@ const Users = () =>{
     }, []);
 
     const handleAddUser = (name: string, age: number) => {
-        addUser(name, age)
+        apiService.addUser(name, age)
             .then(newUser => setUsers([...users, newUser]))
             .catch(error => {
                 console.error('유저 생성 오류', error);

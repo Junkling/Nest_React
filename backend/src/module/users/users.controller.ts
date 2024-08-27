@@ -28,6 +28,6 @@ export class UsersController {
 
     @Post('/login')
     login(@Body() req: LoginRequest): Promise<UserResponse> {
-        return this.usersService.login(req);
+        return this.usersService.login(req)
     }
 }
