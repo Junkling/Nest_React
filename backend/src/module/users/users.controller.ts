@@ -1,7 +1,9 @@
-import {Body, Controller, Delete, Get, Param, Post} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Post, Req, UseGuards} from '@nestjs/common';
 import {UsersService} from "./users.service";
 import {UserRequest} from "../../type/user/UserRequest";
 import {UserResponse} from "../../type/user/UserResponse";
+import {LoginRequest} from "../../type/user/LoginRequest";
+import {JwtAuthGuard} from "../../auth/guard";
 
 @Controller('users')
 export class UsersController {
@@ -10,11 +12,6 @@ export class UsersController {
     @Get()
     findAll(): Promise<UserResponse[]> {
         return this.usersService.findAll();
-    }
-
-    @Get(':id')
-    findOne(@Param('id') id: number): Promise<UserResponse> {
-        return this.usersService.findOne(id);
     }
 
     @Post()
@@ -27,7 +24,18 @@ export class UsersController {
     }
 
     @Post('/login')
-    login(@Body() req: LoginRequest): Promise<UserResponse> {
+    login(@Body() req: LoginRequest): Promise<{token: string, userResponse: UserResponse }> {
         return this.usersService.login(req);
+    }
+
+    @Get('/profile')
+    @UseGuards(JwtAuthGuard)  // JWT 토큰 검증이 필요한 엔드포인트에 적용
+    getProfile(@Req() req: any) {
+        return req.user;  // JWT에서 추출된 사용자 정보
+    }
+
+    @Get(':id')
+    findOne(@Param('id') id: number): Promise<UserResponse> {
+        return this.usersService.findOne(id);
     }
 }

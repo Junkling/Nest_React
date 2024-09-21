@@ -5,7 +5,7 @@ import {IsInt, IsNotEmpty, Min} from "class-validator";
 @Entity('users')
 export class User {
     @PrimaryGeneratedColumn()
-    readonly id?: number;
+    readonly id!: number;
 
     @Column()
     username: string;
@@ -14,7 +14,7 @@ export class User {
     password: string;
 
     @Column()
-    private name: string;
+    name: string;
 
     @Column()
     @IsInt()
