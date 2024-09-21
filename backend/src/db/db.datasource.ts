@@ -16,7 +16,7 @@ function getEnvVariable(name: string): string {
 }
 
 // DataSource 설정
-export const AppDataSource = new DataSource({
+export const DbDatasource = new DataSource({
     type: getEnvVariable('DB_CONNECTION') as 'postgres',
     host: getEnvVariable('DB_HOST'),
     port: parseInt(getEnvVariable('DB_PORT'), 10),  // 환경 변수를 파싱하여 포트 번호로 사용

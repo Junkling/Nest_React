@@ -2,7 +2,7 @@ import {Injectable, NotFoundException} from "@nestjs/common";
 import {InjectRepository} from "@nestjs/typeorm";
 import {Boards} from "./boards.entity";
 import {Repository} from "typeorm";
-import {orElseThrow} from "../../db/utils";
+import {orElseThrow} from "../../db/db.utils";
 import {PageRequest, toFindOption} from "../../type/pagenation/PageRequest";
 import {PageResult} from "../../type/pagenation/PageResult";
 import {User} from "../users/user.entity";

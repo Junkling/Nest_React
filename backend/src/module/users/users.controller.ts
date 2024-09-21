@@ -3,7 +3,7 @@ import {UsersService} from "./users.service";
 import {UserRequest} from "../../type/user/UserRequest";
 import {UserResponse} from "../../type/user/UserResponse";
 import {LoginRequest} from "../../type/user/LoginRequest";
-import {JwtAuthGuard} from "../../auth/guard";
+import {JwtAuthGuard} from "../../auth/auth.guard";
 
 @Controller('users')
 export class UsersController {

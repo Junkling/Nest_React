@@ -2,7 +2,7 @@ import {Injectable, NotFoundException, UnauthorizedException} from '@nestjs/comm
 import {InjectRepository} from "@nestjs/typeorm";
 import {User} from "./user.entity";
 import {Repository} from "typeorm";
-import {orElseThrow} from "../../db/utils";
+import {orElseThrow} from "../../db/db.utils";
 import {UserRequest} from "../../type/user/UserRequest";
 import {toUserResponse, UserResponse} from "../../type/user/UserResponse";
 import {LoginRequest} from "../../type/user/LoginRequest";
