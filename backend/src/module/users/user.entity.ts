@@ -1,11 +1,14 @@
 import {Column, Entity, OneToMany, PrimaryGeneratedColumn} from "typeorm";
 import {Boards} from "../boards/boards.entity";
 import {IsInt, IsNotEmpty, Min} from "class-validator";
+import {Languages} from "../languages/languages.entity";
+import {WishLanguages} from "../languages/wish-languages.entity";
+import {NativeLanguages} from "../languages/native-languages.entity";
 
 @Entity('users')
 export class User {
     @PrimaryGeneratedColumn()
-    readonly id?: number;
+    readonly id!: number;
 
     @Column()
     username: string;
@@ -14,18 +17,27 @@ export class User {
     password: string;
 
     @Column()
-    private name: string;
+    name: string;
 
     @Column()
     @IsInt()
-    @Min(0, { message: 'Age must be a positive number' })
-    private age: number;
+    @Min(0, {message: 'Age must be a positive number'})
+    age: number;
 
     @Column()
-    private introduce?: string;
+    introduce?: string;
 
     @OneToMany(() => Boards, (boards) => boards.user)
     readonly boardList!: Boards[];  // 배열 초기화를 제거
+
+    @OneToMany(() => NativeLanguages, (nativeLanguages) => nativeLanguages.user)
+    readonly nativeLanguages!: NativeLanguages[]; // 숙련 언어 리스트
+
+    @OneToMany(() => WishLanguages, (wishLanguage) => wishLanguage.user)
+    readonly wishLanguages!: WishLanguages[]; // 학습하고자 하는 언어 리스트
+
+    @Column()
+    matchOpenStatus: boolean;
 
     constructor(username: string, password: string, name: string, age: number, introduce?: string) {
         this.username = username;
@@ -33,6 +45,7 @@ export class User {
         this.name = name;
         this.age = age;
         this.introduce = introduce;
+        this.matchOpenStatus = true;
     }
 
     getId() {
@@ -63,11 +76,15 @@ export class User {
         return this.boardList;
     }
 
-    editUser(name:string, age: number, introduce?: string) {
+    editUser(name: string, age: number, introduce?: string) {
         this.name = name;
         this.age = age;
         this.introduce = introduce;
         return this;
+    }
+
+    changeOpenStatus() {
+        this.matchOpenStatus = !this.matchOpenStatus;
     }
 
 }
