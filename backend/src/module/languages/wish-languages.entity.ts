@@ -11,7 +11,7 @@ export class WishLanguages {
     user!: User;
 
     @ManyToOne(() => Languages, (language) => language.wishLanguages)
-    language: Languages;
+    language!: Languages;
 
     constructor(user: User, language:Languages) {
         this.user = user;

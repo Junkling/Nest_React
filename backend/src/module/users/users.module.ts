@@ -3,7 +3,7 @@ import {UsersService} from './users.service';
 import {UsersController} from './users.controller';
 import {User} from "./user.entity";
 import {TypeOrmModule} from "@nestjs/typeorm";
-import {CustomJwtModule} from "../../jwt/jwt.module";
+import {CustomJwtModule} from "../jwt/jwt.module";
 import {AuthModule} from "../../auth/auth.module";
 import {LanguageService} from "../languages/languages.service";
 import {LanguagesModule} from "../languages/languages.module";

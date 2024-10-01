@@ -8,10 +8,10 @@ export class NativeLanguages {
     readonly id!: number;
 
     @ManyToOne(() => User, (user) => user.nativeLanguages)
-    user: User;
+    user!: User;
 
     @ManyToOne(() => Languages, (language) => language.nativeLanguages)
-    language: Languages;
+    language!: Languages;
 
     constructor(user: User, language: Languages) {
         this.user = user;

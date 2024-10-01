@@ -37,6 +37,7 @@ export class UsersController {
     @Get('/profile')
     @UseGuards(JwtAuthGuard)  // JWT 토큰 검증이 필요한 엔드포인트에 적용
     getProfile(@Req() req: any) {
+        console.log(`user.id: ${req.user.id}`);
         return req.user;  // JWT에서 추출된 사용자 정보
     }
 

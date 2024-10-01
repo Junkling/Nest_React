@@ -7,7 +7,7 @@ import {UserRequest} from "../../type/user/UserRequest";
 import {toUserResponse, UserResponse} from "../../type/user/UserResponse";
 import {LoginRequest} from "../../type/user/LoginRequest";
 import * as bcrypt from 'bcrypt';
-import {JwtUtilsService} from "../../jwt/jwt.service";
+import {JwtUtilsService} from "../jwt/jwt.service";
 import {LanguageService} from "../languages/languages.service";
 import {
     entityToUserLanguageResponse,
@@ -32,10 +32,10 @@ export class UsersService {
     }
 
     async findOne(id: number): Promise<UserLanguageResponse> {
-    // async findOne(id: number): Promise<User> {
+        // async findOne(id: number): Promise<User> {
         const [user] = await Promise.all([orElseThrow(await this.userRepository.findOne({
             where: {id},
-            relations: ['boardList', 'nativeLanguages', 'wishLanguages','wishLanguages.language', 'nativeLanguages.language']
+            relations: ['boardList', 'nativeLanguages', 'wishLanguages', 'wishLanguages.language', 'nativeLanguages.language']
         }), () => new NotFoundException(`해당 리소스를 찾지 못했습니다. ID = ${id}`))]);
         return entityToUserLanguageResponse(user);
     }
@@ -48,7 +48,7 @@ export class UsersService {
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(req.password, saltRounds);  // 비밀번호 해시
 
-        const saved = await this.userRepository.save(new User(req.username, hashedPassword, req.name, req.age, req.introduce));
+        const saved = await this.userRepository.save(new User(req.username, hashedPassword, req.name, req.age, req.introduce, req.gender));
         const nativeLanguages = await this.languageService.saveNativeLanguages(saved, req.nativeLanguageIds);
         const wishLanguages = await this.languageService.saveWishLanguages(saved, req.wishLanguageIds);
 

@@ -1,7 +1,7 @@
 // jwt.jwt.strategy.ts
-import { Injectable } from '@nestjs/common';
-import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
+import {Injectable} from '@nestjs/common';
+import {PassportStrategy} from '@nestjs/passport';
+import {ExtractJwt, Strategy} from 'passport-jwt';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -13,7 +13,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         });
     }
 
-    async validate(payload: any) {
-        return { userId: payload.userId, name: payload.name };  // JWT의 payload를 반환 (userId와 name)
+    async validate(payload: any): Promise<{ id: number, name: string }> {
+        return {id: payload.id, name: payload.name};  // JWT의 payload를 반환 (userId와 name)
     }
 }

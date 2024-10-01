@@ -1,9 +1,10 @@
 import {Column, Entity, OneToMany, PrimaryGeneratedColumn} from "typeorm";
 import {Boards} from "../boards/boards.entity";
-import {IsInt, IsNotEmpty, Min} from "class-validator";
-import {Languages} from "../languages/languages.entity";
+import {IsInt, Min} from "class-validator";
 import {WishLanguages} from "../languages/wish-languages.entity";
 import {NativeLanguages} from "../languages/native-languages.entity";
+import {Invite} from "../invites/invites.entity";
+import {Gender} from "../../type/user/Gender";
 
 @Entity('users')
 export class User {
@@ -36,16 +37,34 @@ export class User {
     @OneToMany(() => WishLanguages, (wishLanguage) => wishLanguage.user)
     readonly wishLanguages!: WishLanguages[]; // 학습하고자 하는 언어 리스트
 
+    @OneToMany(() => Invite, (invite) => invite.sender)
+    readonly inviteSend!: Invite[];
+
+    @OneToMany(() => Invite, (invite) => invite.recipient)
+    readonly inviteReceipt!: Invite[];
+
     @Column()
     matchOpenStatus: boolean;
 
-    constructor(username: string, password: string, name: string, age: number, introduce?: string) {
+    @Column({
+        type: 'enum',
+        enum: Gender,
+        default: Gender.UNKNOWN,
+    })
+    gender: Gender;
+
+    constructor(username: string, password: string, name: string, age: number, introduce?: string, gender?: Gender) {
         this.username = username;
         this.password = password;
         this.name = name;
         this.age = age;
         this.introduce = introduce;
         this.matchOpenStatus = true;
+        if (!gender) {
+            this.gender = Gender.UNKNOWN;
+        } else {
+            this.gender = gender;
+        }
     }
 
     getId() {
