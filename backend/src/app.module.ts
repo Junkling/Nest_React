@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import {Module, OnModuleInit} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -36,4 +36,13 @@ function loadModules(): any[] {
     controllers: [AppController],
     providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements OnModuleInit {
+    async onModuleInit() {
+        try {
+            await DbDatasource.initialize();  // 데이터베이스 연결 초기화
+            console.log('Database connection established successfully');
+        } catch (error) {
+            console.error('Error during Data Source initialization', error);
+        }
+    }
+}

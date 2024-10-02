@@ -5,9 +5,10 @@ import {WishLanguages} from "../languages/wish-languages.entity";
 import {NativeLanguages} from "../languages/native-languages.entity";
 import {Invite} from "../invites/invites.entity";
 import {Gender} from "../../type/user/Gender";
+import {BaseTimeEntity} from "../common/base.time.entity";
 
 @Entity('users')
-export class User {
+export class User extends BaseTimeEntity{
     @PrimaryGeneratedColumn()
     readonly id!: number;
 
@@ -54,6 +55,7 @@ export class User {
     gender: Gender;
 
     constructor(username: string, password: string, name: string, age: number, introduce?: string, gender?: Gender) {
+        super();
         this.username = username;
         this.password = password;
         this.name = name;

@@ -10,11 +10,14 @@ import {Languages} from "../languages/languages.entity";
 import {JwtModule} from "@nestjs/jwt";
 import {AuthModule} from "../../auth/auth.module";
 import {CustomJwtModule} from "../jwt/jwt.module";
+import {ChatService} from "../chat/chat.service";
+import {ChatModule} from "../chat/chat.module";
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([Invite, User, NativeLanguages, WishLanguages, Languages])
         , AuthModule
+        , ChatModule
     ],
     providers: [InviteService],
     controllers: [InviteController],
