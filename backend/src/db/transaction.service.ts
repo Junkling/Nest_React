@@ -1,5 +1,5 @@
-import { DataSource } from 'typeorm';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {DataSource} from 'typeorm';
+import {Injectable, InternalServerErrorException} from '@nestjs/common';
 
 @Injectable()
 export class TransactionalService {

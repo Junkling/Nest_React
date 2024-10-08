@@ -1,9 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
+import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn} from 'typeorm';
 import {BaseTimeEntity} from "../common/base.time.entity";
 import {ChatRoom} from "./chat.room.entity";
 
 @Entity('chat_messages')
-export class ChatMessage extends BaseTimeEntity{
+export class ChatMessage extends BaseTimeEntity {
     @PrimaryGeneratedColumn()
     readonly id!: number;
 

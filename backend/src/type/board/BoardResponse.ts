@@ -1,5 +1,4 @@
 import {toUserResponse, UserResponse} from "../user/UserResponse";
-import {PageRequest} from "../pagenation/PageRequest";
 import {Boards} from "../../module/boards/boards.entity";
 
 export interface BoardResponse {

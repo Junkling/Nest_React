@@ -1,7 +1,13 @@
-import { WebSocketGateway, WebSocketServer, SubscribeMessage, OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
-import { ChatService } from './chat.service';
-import { Inject } from '@nestjs/common';
+import {
+    WebSocketGateway,
+    WebSocketServer,
+    SubscribeMessage,
+    OnGatewayConnection,
+    OnGatewayDisconnect
+} from '@nestjs/websockets';
+import {Server, Socket} from 'socket.io';
+import {ChatService} from './chat.service';
+import {Inject} from '@nestjs/common';
 import {RedisService} from "../redis/redis.service";
 
 @WebSocketGateway({
@@ -16,7 +22,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     constructor(
         private readonly chatService: ChatService, // 채팅 메시지 저장 서비스
         @Inject(RedisService) private readonly redisService: RedisService // Redis 서비스
-    ) {}
+    ) {
+    }
 
     async handleConnection(client: Socket) {
         console.log(`Client connected: ${client.id}`);

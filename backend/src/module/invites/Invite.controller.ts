@@ -51,6 +51,7 @@ export class InviteController {
         //Todo : 이미 요청 보낸 유저는 제외하는 로직 추가해야 함
         return this.inviteService.searchUserForLanguageExchange(req.user.id, req.params.wishLanguageId);
     }
+
     //Todo: 랜덤 유저 하나 가져오기 api도 추가해야함
 
     @Post()

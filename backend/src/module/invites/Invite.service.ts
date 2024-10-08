@@ -150,7 +150,7 @@ export class InviteService {
             const roomName = `chat_${findInvite.sender.id}_${findInvite.recipient.id}`;
 
             // 2. Redis 채널을 이용한 채팅방 생성 및 구독
-            await this.chatService.createChatRoom(roomName); // chatService는 채팅 관련 로직을 관리하는 서비스
+            await this.chatService.createChatRoom(roomName, findInvite.sender, findInvite.recipient); // chatService는 채팅 관련 로직을 관리하는 서비스
 
             // 3. 기본 메시지 발송
             const sender = findInvite.sender.name;  // or findInvite.sender.id depending on what you store

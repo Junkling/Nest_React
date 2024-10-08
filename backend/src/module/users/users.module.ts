@@ -5,16 +5,16 @@ import {User} from "./user.entity";
 import {TypeOrmModule} from "@nestjs/typeorm";
 import {CustomJwtModule} from "../jwt/jwt.module";
 import {AuthModule} from "../../auth/auth.module";
-import {LanguageService} from "../languages/languages.service";
 import {LanguagesModule} from "../languages/languages.module";
 import {Languages} from "../languages/languages.entity";
 import {NativeLanguages} from "../languages/native-languages.entity";
 import {WishLanguages} from "../languages/wish-languages.entity";
+import {UserChatRoom} from "../chat/user-chat-room.entity";
 
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([User,NativeLanguages, WishLanguages, Languages])
+        TypeOrmModule.forFeature([User,NativeLanguages, WishLanguages, Languages, UserChatRoom])
         , CustomJwtModule
         , AuthModule
         , LanguagesModule

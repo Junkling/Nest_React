@@ -1,6 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { createClient } from 'redis';
-import {ChatMessage} from "../chat/chat.message.entity";
+import {Injectable} from '@nestjs/common';
+import {createClient} from 'redis';
 
 @Injectable()
 export class RedisService {
@@ -10,11 +9,11 @@ export class RedisService {
     constructor() {
         this.publisherClient = createClient({
             url: 'redis://localhost:6379',
-            password:'PdiFyZgOVKiq1fT'
+            // password:'PdiFyZgOVKiq1fT'
         });
         this.subscriberClient = createClient({
             url: 'redis://localhost:6379',
-            password: 'PdiFyZgOVKiq1fT'  // 비밀번호 필요시 추가
+            // password: 'PdiFyZgOVKiq1fT'  // 비밀번호 필요시 추가
         });
         // Redis 클라이언트 연결
         this.publisherClient.connect().catch(console.error);

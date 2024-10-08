@@ -7,11 +7,12 @@ import {User} from "../users/user.entity";
 import {ChatRoom} from "./chat.room.entity";
 import {ChatMessage} from "./chat.message.entity";
 import {RedisService} from "../redis/redis.service";
+import {UserChatRoom} from "./user-chat-room.entity";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([ChatRoom,ChatMessage, User])],
+    imports: [TypeOrmModule.forFeature([ChatRoom, ChatMessage, User, UserChatRoom])],
     providers: [ChatGateway, ChatService, RedisService],
     exports: [ChatService]
-
 })
-export class ChatModule {}
+export class ChatModule {
+}

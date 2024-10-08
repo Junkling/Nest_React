@@ -13,7 +13,8 @@ import {
     entityToUserLanguageResponse,
     toUserLanguageResponse,
     UserLanguageResponse
-} from "../../type/user/UserLanguageResponse"; // bcrypt import
+} from "../../type/user/UserLanguageResponse";
+import {entityToUserChatRoomResponse, UserChatRoomResponse} from "../../type/user/UserChatRoomResponse";
 
 
 @Injectable()
@@ -24,9 +25,9 @@ export class UsersService {
         , private readonly languageService: LanguageService) {
     }
 
-    async findAll(): Promise<(UserResponse)[]> {
-        const userResult = await this.userRepository.find({relations: ['boardList']});
-        const result = userResult.map(toUserResponse);
+    async findAll(): Promise<UserLanguageResponse[]> {
+        const userResult = await this.userRepository.find({relations: ['boardList', 'nativeLanguages', 'wishLanguages', 'wishLanguages.language', 'nativeLanguages.language']});
+        const result = userResult.map(entityToUserLanguageResponse);
         return result;
 
     }
@@ -38,6 +39,21 @@ export class UsersService {
             relations: ['boardList', 'nativeLanguages', 'wishLanguages', 'wishLanguages.language', 'nativeLanguages.language']
         }), () => new NotFoundException(`해당 리소스를 찾지 못했습니다. ID = ${id}`))]);
         return entityToUserLanguageResponse(user);
+    }
+
+    async findUserChatRoom(id: number): Promise<UserChatRoomResponse[]> {
+        // async findOne(id: number): Promise<User> {
+        const [user] = await Promise.all([orElseThrow(await this.userRepository.findOne({
+            where: {id},
+            relations: ['userChatRoom', 'userChatRoom.chatRoom']
+        }), () => new NotFoundException(`해당 리소스를 찾지 못했습니다. ID = ${id}`))]);
+        console.log(`user.chatRoom = ${user.userChatRoom.map(i => i.chatRoom.id)} , ${user.userChatRoom.map(i => i.chatRoom.roomName)}`);
+
+        const list: UserChatRoomResponse[] = user.userChatRoom.map(userChatRoom =>
+            entityToUserChatRoomResponse(userChatRoom.chatRoom)
+        );
+
+        return list;
     }
 
     async remove(id: number): Promise<void> {

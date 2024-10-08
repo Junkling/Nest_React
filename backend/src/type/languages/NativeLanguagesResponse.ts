@@ -1,6 +1,4 @@
 import {LanguagesResponse, toLanguagesResponse} from "./LanguagesResponse";
-import {WishLanguages} from "../../module/languages/wish-languages.entity";
-import {UserResponse} from "../user/UserResponse";
 import {NativeLanguages} from "../../module/languages/native-languages.entity";
 
 export interface NativeLanguagesResponse {

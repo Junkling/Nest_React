@@ -6,6 +6,7 @@ import {NativeLanguages} from "../languages/native-languages.entity";
 import {Invite} from "../invites/invites.entity";
 import {Gender} from "../../type/user/Gender";
 import {BaseTimeEntity} from "../common/base.time.entity";
+import {UserChatRoom} from "../chat/user-chat-room.entity";
 
 @Entity('users')
 export class User extends BaseTimeEntity{
@@ -43,6 +44,9 @@ export class User extends BaseTimeEntity{
 
     @OneToMany(() => Invite, (invite) => invite.recipient)
     readonly inviteReceipt!: Invite[];
+
+    @OneToMany(() => UserChatRoom, userChatRoom => userChatRoom.user)
+    readonly userChatRoom!: UserChatRoom[];
 
     @Column()
     matchOpenStatus: boolean;

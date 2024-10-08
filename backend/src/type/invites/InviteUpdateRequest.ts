@@ -2,7 +2,7 @@ import {InviteStatus} from "./InviteStatus";
 
 export interface InviteStateUpdateRequest {
     inviteId: number,
-    status: InviteStatus
+    status: InviteStatus,
 }
 
 export interface InviteContentUpdateRequest {

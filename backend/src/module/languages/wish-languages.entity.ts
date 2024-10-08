@@ -1,6 +1,6 @@
-import { Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { User } from "../users/user.entity";
-import { Languages } from "../languages/languages.entity";
+import {Entity, ManyToOne, PrimaryGeneratedColumn} from "typeorm";
+import {User} from "../users/user.entity";
+import {Languages} from "../languages/languages.entity";
 
 @Entity('wish_languages')
 export class WishLanguages {

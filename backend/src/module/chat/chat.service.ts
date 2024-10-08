@@ -4,20 +4,30 @@ import { Repository } from 'typeorm';
 import {ChatRoom} from "./chat.room.entity";
 import {ChatMessage} from "./chat.message.entity";
 import {RedisService} from "../redis/redis.service";
+import {UserChatRoom} from "./user-chat-room.entity";
+import {User} from "../users/user.entity";
+import {Transaction} from "../../db/db.utils";
 
 @Injectable()
 export class ChatService {
     constructor(
         @InjectRepository(ChatRoom)
         private readonly chatRoomRepository: Repository<ChatRoom>,
+        @InjectRepository(UserChatRoom)
+        private readonly userChatRoomRepository: Repository<UserChatRoom>,
         @InjectRepository(ChatMessage)
         private readonly chatMessageRepository: Repository<ChatMessage>,
         private readonly redisService: RedisService,
     ) {}
     // 채팅방 생성 메서드
-    async createChatRoom(roomName: string): Promise<void> {
+    @Transaction()
+    async createChatRoom(roomName: string, sender: User, receipt: User): Promise<void> {
         console.log(`채팅방 '${roomName}' 생성`);
-        // 구독만으로는 채팅방을 생성한 효과 (실제 방 생성은 없음)
+        // 채팅방 만들고 채팅방 유저와 엮고
+        const chatRoom = await this.chatRoomRepository.save(new ChatRoom(roomName));
+        await this.userChatRoomRepository.save(new UserChatRoom(sender, chatRoom));
+        await this.userChatRoomRepository.save(new UserChatRoom(receipt, chatRoom));
+
         await this.redisService.subscribeToRoom(roomName, (message) => {
             console.log(`채팅방 ${roomName}에서 수신된 메시지: ${message}`);
         });

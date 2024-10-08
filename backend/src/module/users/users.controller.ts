@@ -1,12 +1,11 @@
 import {Body, Controller, Delete, Get, Param, Post, Req, UseGuards} from '@nestjs/common';
 import {UsersService} from "./users.service";
 import {UserRequest} from "../../type/user/UserRequest";
-import {toUserResponse, UserResponse} from "../../type/user/UserResponse";
+import {UserResponse} from "../../type/user/UserResponse";
 import {LoginRequest} from "../../type/user/LoginRequest";
 import {JwtAuthGuard} from "../../auth/auth.guard";
-import {LanguageService} from "../languages/languages.service";
 import {UserLanguageResponse} from "../../type/user/UserLanguageResponse";
-import {User} from "./user.entity";
+import {UserChatRoomResponse} from "../../type/user/UserChatRoomResponse";
 
 @Controller('users')
 export class UsersController {
@@ -15,7 +14,7 @@ export class UsersController {
     }
 
     @Get()
-    findAll(): Promise<UserResponse[]> {
+    findAll(): Promise<UserLanguageResponse[]> {
         return this.usersService.findAll();
     }
 
@@ -39,6 +38,12 @@ export class UsersController {
     getProfile(@Req() req: any) {
         console.log(`user.id: ${req.user.id}`);
         return req.user;  // JWT에서 추출된 사용자 정보
+    }
+
+    @Get('chatroom')
+    @UseGuards(JwtAuthGuard)  // JWT 토큰 검증이 필요한 엔드포인트에 적용
+    getChatRoom(@Req() req: any): Promise<UserChatRoomResponse[]> {
+        return this.usersService.findUserChatRoom(req.user.id);
     }
 
     @Get(':id')

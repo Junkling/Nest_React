@@ -1,5 +1,5 @@
 import {Module, OnModuleInit} from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import {TypeOrmModule} from '@nestjs/typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
 import {AppController} from "./app.controller";

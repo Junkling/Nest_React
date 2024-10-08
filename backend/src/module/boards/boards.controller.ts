@@ -1,6 +1,5 @@
 import {Body, Controller, Delete, Get, Param, Post, Query} from "@nestjs/common";
 import {BoardsService} from "./boards.service";
-import {Boards} from "./boards.entity";
 import {PageResult} from "../../type/pagenation/PageResult";
 import {PageRequest} from "../../type/pagenation/PageRequest";
 import {BoardRequest} from "../../type/board/BoardRequest";
