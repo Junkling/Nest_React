@@ -108,7 +108,7 @@ export class User extends BaseTimeEntity{
         return this;
     }
 
-    changeOpenStatus() {
+    changeMatchStatus() {
         this.matchOpenStatus = !this.matchOpenStatus;
     }
 

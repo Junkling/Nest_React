@@ -7,7 +7,8 @@ const Navigation: React.FC = () => {
             <ul>
                 <li><Link to="/">Home</Link></li>
                 <li><Link to="/users">User List</Link></li>
-                <li><Link to="/users/chatroom">Chat Room</Link></li>
+                <li><Link to="/login">login</Link></li>
+                {/*<li><Link to="/users/chatroom">Chat Room</Link></li>*/}
             </ul>
         </nav>
     );

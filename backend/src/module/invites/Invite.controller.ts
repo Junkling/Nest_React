@@ -7,7 +7,9 @@ import {InviteResponse} from "../../type/invites/InviteResponse";
 import {InviteSendResponse} from "../../type/invites/InviteSendResponse";
 import {InviteRecipientResponse} from "../../type/invites/InviteRecipientResponse";
 import {InviteContentUpdateRequest, InviteStateUpdateRequest} from "../../type/invites/InviteUpdateRequest";
+import {ApiBearerAuth, ApiTags} from "@nestjs/swagger";
 
+@ApiTags('invites')
 @Controller('invites')
 export class InviteController {
 
@@ -18,30 +20,35 @@ export class InviteController {
 
     @Get('send')
     @UseGuards(JwtAuthGuard)  // JWT 토큰 검증이 필요한 엔드포인트에 적용
+    @ApiBearerAuth() // Swagger 문서에서 인증 필요 표시
     getAllSendInviteByUser(@Req() req: any): Promise<InviteSendResponse[]> {
         return this.inviteService.findSendInviteByUserId(req.user.id);
     }
 
     @Get('recipient')
     @UseGuards(JwtAuthGuard)  // JWT 토큰 검증이 필요한 엔드포인트에 적용
+    @ApiBearerAuth() // Swagger 문서에서 인증 필요 표시
     getAllRecipientInviteByUser(@Req() req: any): Promise<InviteRecipientResponse[]> {
         return this.inviteService.findRecipientInviteByUserId(req.user.id);
     }
 
     @Patch('state')
     @UseGuards(JwtAuthGuard)  // JWT 토큰 검증이 필요한 엔드포인트에 적용
+    @ApiBearerAuth() // Swagger 문서에서 인증 필요 표시
     updateInviteState(@Body() updateRequest: InviteStateUpdateRequest, @Req() req: any): Promise<InviteResponse> {
         return this.inviteService.updateInviteState(req.user.id, updateRequest);
     }
 
     @Patch('content')
     @UseGuards(JwtAuthGuard)  // JWT 토큰 검증이 필요한 엔드포인트에 적용
+    @ApiBearerAuth() // Swagger 문서에서 인증 필요 표시
     updateInviteContent(@Body() updateRequest: InviteContentUpdateRequest, @Req() req: any): Promise<InviteResponse> {
         return this.inviteService.updateInviteContent(req.user.id, updateRequest);
     }
 
     @Get(":wishLanguageId")
     @UseGuards(JwtAuthGuard)  // JWT 토큰 검증이 필요한 엔드포인트에 적용
+    @ApiBearerAuth() // Swagger 문서에서 인증 필요 표시
     matchUser(@Req() req: any, @Param("wishLanguageId") wishLanguageId: number): Promise<UserResponse[]> {
         if (!wishLanguageId || !req.user.id) {
             console.log(`wishLanguageId: ${wishLanguageId}`);
@@ -56,6 +63,7 @@ export class InviteController {
 
     @Post()
     @UseGuards(JwtAuthGuard)  // JWT 토큰 검증이 필요한 엔드포인트에 적용
+    @ApiBearerAuth() // Swagger 문서에서 인증 필요 표시
     sendInviteRequest(@Body() inviteRequest: InviteRequest, @Req() req: any): Promise<InviteResponse> {
         return this.inviteService.creatInvite(inviteRequest, req.user.id);
     }

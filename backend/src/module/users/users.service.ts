@@ -15,6 +15,8 @@ import {
     UserLanguageResponse
 } from "../../type/user/UserLanguageResponse";
 import {entityToUserChatRoomResponse, UserChatRoomResponse} from "../../type/user/UserChatRoomResponse";
+import {PageRequest, toFindOption} from "../../type/pagenation/PageRequest";
+import {PageResult, toPageResult} from "../../type/pagenation/PageResult";
 
 
 @Injectable()
@@ -25,12 +27,26 @@ export class UsersService {
         , private readonly languageService: LanguageService) {
     }
 
-    async findAll(): Promise<UserLanguageResponse[]> {
+    findAll(pageReq: PageRequest): Promise<UserLanguageResponse[] | PageResult<UserLanguageResponse>> {
+        return pageReq.page <= 0 ? this.findAllList() : this.findAllByPage(pageReq);
+    }
+
+    private async findAllList(): Promise<UserLanguageResponse[]> {
         const userResult = await this.userRepository.find({relations: ['boardList', 'nativeLanguages', 'wishLanguages', 'wishLanguages.language', 'nativeLanguages.language']});
         const result = userResult.map(entityToUserLanguageResponse);
         return result;
-
     }
+
+    private async findAllByPage(pageReq: PageRequest): Promise<PageResult<UserLanguageResponse>> {
+        const [users, count] = await this.userRepository.findAndCount(
+            {
+                ...toFindOption(pageReq)
+                , relations: ['boardList', 'nativeLanguages', 'wishLanguages', 'wishLanguages.language', 'nativeLanguages.language'],
+            });
+        const data = users.map(entityToUserLanguageResponse);
+        return toPageResult(data, count, pageReq.page, pageReq.size);
+    }
+
 
     async findOne(id: number): Promise<UserLanguageResponse> {
         // async findOne(id: number): Promise<User> {
@@ -84,6 +100,13 @@ export class UsersService {
         const token = this.jwtService.generateJwt(user.id, user.name);
         const userResponse = toUserResponse(user);
         return {token, userResponse};
+    }
+
+    async changeMatchStatus(userId: number) :Promise<UserResponse> {
+        const user = orElseThrow(await this.userRepository.findOne({where: {id: userId}}), () => new NotFoundException('유저 정보가 없습니다.'));
+        user.changeMatchStatus()
+        const updated = await this.userRepository.save(user);
+        return toUserResponse(updated);
     }
 
 }

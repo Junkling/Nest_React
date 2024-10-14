@@ -4,19 +4,17 @@ import {PageResult} from "../../type/pagenation/PageResult";
 import {PageRequest} from "../../type/pagenation/PageRequest";
 import {BoardRequest} from "../../type/board/BoardRequest";
 import {BoardResponse} from "../../type/board/BoardResponse";
+import {ApiTags} from "@nestjs/swagger";
 
+@ApiTags('boards')
 @Controller('boards')
 export class BoardsController {
     constructor(private readonly boardsService: BoardsService) {}
 
     @Get()
     findAll(
-        @Query('page') page: number = 1,
-        @Query('size') size: number = 10,
-        @Query('field') field: string = 'id',
-        @Query('sort') sort: 'ASC' | 'DESC' = 'DESC'
+        @Query() pageReq: PageRequest,
     ): Promise<PageResult<BoardResponse>> {
-        const pageReq : PageRequest = { page, size, field, sort };
         return this.boardsService.findMany(pageReq);
     }
 

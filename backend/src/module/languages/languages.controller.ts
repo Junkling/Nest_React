@@ -2,7 +2,9 @@ import {Body, Controller, Get, Post} from "@nestjs/common";
 import {LanguageService} from "./languages.service";
 import {LanguagesRequest} from "../../type/languages/LanguagesRequest";
 import {LanguagesResponse} from "../../type/languages/LanguagesResponse";
+import {ApiTags} from "@nestjs/swagger";
 
+@ApiTags('languages')
 @Controller('languages')
 export class LanguagesController {
     constructor(private readonly languageService: LanguageService) {
