@@ -14,7 +14,7 @@ import {
     toUserLanguageResponse,
     UserLanguageResponse
 } from "../../type/user/UserLanguageResponse";
-import {entityToUserChatRoomResponse, UserChatRoomResponse} from "../../type/user/UserChatRoomResponse";
+import {ChatRoomResponse, entityToChatRoomResponse} from "../../type/chat/ChatRoomResponse";
 import {PageRequest, toFindOption} from "../../type/pagenation/PageRequest";
 import {PageResult, toPageResult} from "../../type/pagenation/PageResult";
 
@@ -57,7 +57,7 @@ export class UsersService {
         return entityToUserLanguageResponse(user);
     }
 
-    async findUserChatRoom(id: number): Promise<UserChatRoomResponse[]> {
+    async findUserChatRoom(id: number): Promise<ChatRoomResponse[]> {
         // async findOne(id: number): Promise<User> {
         const [user] = await Promise.all([orElseThrow(await this.userRepository.findOne({
             where: {id},
@@ -65,8 +65,8 @@ export class UsersService {
         }), () => new NotFoundException(`해당 리소스를 찾지 못했습니다. ID = ${id}`))]);
         console.log(`user.chatRoom = ${user.userChatRoom.map(i => i.chatRoom.id)} , ${user.userChatRoom.map(i => i.chatRoom.roomName)}`);
 
-        const list: UserChatRoomResponse[] = user.userChatRoom.map(userChatRoom =>
-            entityToUserChatRoomResponse(userChatRoom.chatRoom)
+        const list: ChatRoomResponse[] = user.userChatRoom.map(userChatRoom =>
+            entityToChatRoomResponse(userChatRoom.chatRoom)
         );
 
         return list;

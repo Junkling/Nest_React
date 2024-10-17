@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from "../../apis/apiService";
-import { Board } from "../../types/Board";
+import { Board } from "../../types/board/Board";
 
 const Boards: React.FC = () => {
     const [boards, setBoards] = useState<Board[]>([]);

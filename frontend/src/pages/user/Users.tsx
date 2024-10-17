@@ -1,5 +1,5 @@
 import React, {Component, useEffect, useState} from 'react';
-import {User} from "../../types/User";
+import {User} from "../../types/user/User";
 import UserList from "../../components/user-list/UserList";
 import UserForm from "../../components/user-form/UserForm";
 import {apiService} from "../../apis/apiService";

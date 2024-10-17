@@ -16,11 +16,14 @@ export class RedisService {
             // password: 'PdiFyZgOVKiq1fT'  // 비밀번호 필요시 추가
         });
         // Redis 클라이언트 연결
-        this.publisherClient.connect().catch(console.error);
-        this.subscriberClient.connect().catch(console.error);    }
+        this.publisherClient.connect().then(() => console.log('Publisher Redis client connected'))
+            .catch((error) => console.error('Publisher Redis client connection failed:', error));
 
-    // 방의 메시지를 구독하는 메서드 (SUBSCRIBE)
-    // 방의 메시지를 구독하는 메서드 (SUBSCRIBE)
+        this.subscriberClient.connect()
+            .then(() => console.log('Subscriber Redis client connected'))
+            .catch((error) => console.error('Subscriber Redis client connection failed:', error));
+    }
+
     async subscribeToRoom(roomName: string, callback: (message: string) => void) {
         await this.subscriberClient.subscribe(roomName, (err, count) => {
             if (err) {
@@ -30,6 +33,7 @@ export class RedisService {
             console.log(`Subscribed to ${count} channel(s). Listening for updates on the ${roomName} room.`);
         });
 
+        // 메시지 수신 시 처리
         this.subscriberClient.on('message', (channel, message) => {
             if (channel === roomName) {
                 try {

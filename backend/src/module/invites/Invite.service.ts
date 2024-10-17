@@ -130,37 +130,97 @@ export class InviteService {
         });
         return findList.map(toInviteRecipientResponse);
     }
-
+    //
+    // // 상태 변경 코드
+    // @Transaction()
+    // async updateInviteState(userId: number, req: InviteStateUpdateRequest): Promise<InviteResponse> {
+    //     const findInvite = orElseThrow(await this.inviteRepository.findOne({
+    //         where: {id: req.inviteId},
+    //         relations: ['sender', 'recipient']
+    //     }), () => new NotFoundException('초대 요청을 찾을 수 없습니다.'));
+    //
+    //     if (findInvite) {
+    //         if ((req.status === InviteStatus.ACCEPTED || InviteStatus.REFUSAL) && findInvite.recipient.id !== userId) throw new BadRequestException('잘못된 접근입니다.');
+    //         else if (req.status === InviteStatus.CANCEL && findInvite.sender.id !== userId) throw new BadRequestException('잘못된 접근입니다.');
+    //         findInvite.status = req.status;
+    //     }
+    //     const updated = await this.inviteRepository.save(findInvite);
+    //     if (updated.status === InviteStatus.ACCEPTED) {
+    //         // 1. 채팅방 이름 설정: sender와 recipient를 기반으로 설정
+    //         const roomName = `chat_${findInvite.sender.id}_${findInvite.recipient.id}`;
+    //
+    //         // 2. Redis 채널을 이용한 채팅방 생성 및 구독
+    //         await this.chatService.createChatRoom(roomName, findInvite.sender, findInvite.recipient); // chatService는 채팅 관련 로직을 관리하는 서비스
+    //
+    //         // 3. 기본 메시지 발송
+    //         const sender = findInvite.sender.name;  // or findInvite.sender.id depending on what you store
+    //         const message = `${findInvite.sender.name}님과 ${findInvite.recipient.name}님이 대화를 시작했습니다.`;
+    //         const welcomeMessage = new ChatMessage(sender,message);
+    //
+    //         await this.chatService.sendMessage(roomName, welcomeMessage);
+    //
+    //         console.log(`채팅방 '${roomName}'이 생성되었습니다.`);
+    //     }
+    //     return toInviteResponse(updated);
+    // }
     // 상태 변경 코드
     @Transaction()
     async updateInviteState(userId: number, req: InviteStateUpdateRequest): Promise<InviteResponse> {
+
+        // 초대 정보 조회
         const findInvite = orElseThrow(await this.inviteRepository.findOne({
-            where: {id: req.inviteId},
+            where: { id: req.inviteId },
             relations: ['sender', 'recipient']
-        }), () => new NotFoundException('초대 요청을 찾을 수 없습니다.'));
+        }), () => {
+            console.error('잘못된 접근: 초대 요청을 찾을 수 없습니다.');
+            throw new NotFoundException('초대 요청을 찾을 수 없습니다.')
+        });
 
         if (findInvite) {
-            if ((req.status === InviteStatus.ACCEPTED || InviteStatus.REFUSAL) && findInvite.recipient.id !== userId) throw new BadRequestException('잘못된 접근입니다.');
-            else if (req.status === InviteStatus.CANCEL && findInvite.sender.id !== userId) throw new BadRequestException('잘못된 접근입니다.');
+            if ((req.status === InviteStatus.ACCEPTED || InviteStatus.REFUSAL) && findInvite.recipient.id !== userId) {
+                console.error('잘못된 접근: 초대 수락 또는 거절을 수행할 권한이 없습니다.');
+                throw new BadRequestException('잘못된 접근: 초대 수락 또는 거절을 수행할 권한이 없습니다.');
+            }
+            else if (req.status === InviteStatus.CANCEL && findInvite.sender.id !== userId) {
+                console.error('잘못된 접근: 초대 취소를 수행할 권한이 없습니다.');
+                throw new BadRequestException('잘못된 접근: 초대 취소를 수행할 권한이 없습니다.');
+            }
             findInvite.status = req.status;
         }
+
+        // 초대 정보 업데이트
         const updated = await this.inviteRepository.save(findInvite);
+        // 초대가 수락된 경우, 채팅방 생성 및 메시지 발송 로직
         if (updated.status === InviteStatus.ACCEPTED) {
-            // 1. 채팅방 이름 설정: sender와 recipient를 기반으로 설정
+            console.log('초대 수락됨. 채팅방 생성 시작.');
+
+            // 1. 채팅방 이름 설정
             const roomName = `chat_${findInvite.sender.id}_${findInvite.recipient.id}`;
+            console.log(`채팅방 이름: ${roomName}`);
 
             // 2. Redis 채널을 이용한 채팅방 생성 및 구독
-            await this.chatService.createChatRoom(roomName, findInvite.sender, findInvite.recipient); // chatService는 채팅 관련 로직을 관리하는 서비스
+            try {
+                await this.chatService.createChatRoom(roomName, findInvite.sender, findInvite.recipient);
+                console.log(`채팅방 '${roomName}'이 생성되었습니다.`);
+            } catch (error) {
+                console.error('채팅방 생성 중 오류 발생:', error);
+                throw new BadRequestException('채팅방 생성 중 오류 발생');
+            }
 
             // 3. 기본 메시지 발송
-            const sender = findInvite.sender.name;  // or findInvite.sender.id depending on what you store
+            const sender = findInvite.sender.name; // 또는 findInvite.sender.id
             const message = `${findInvite.sender.name}님과 ${findInvite.recipient.name}님이 대화를 시작했습니다.`;
-            const welcomeMessage = new ChatMessage(sender,message);
+            const welcomeMessage = new ChatMessage(sender, message);
 
-            await this.chatService.sendMessage(roomName, welcomeMessage);
-
-            console.log(`채팅방 '${roomName}'이 생성되었습니다.`);
+            try {
+                await this.chatService.sendMessage(roomName, welcomeMessage);
+                console.log(`채팅방 '${roomName}'에 환영 메시지 전송 완료: ${message}`);
+            } catch (error) {
+                console.error('메시지 발송 중 오류 발생:', error);
+                throw new BadRequestException('메시지 발송 중 오류 발생');
+            }
         }
+
         return toInviteResponse(updated);
     }
 

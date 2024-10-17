@@ -57,17 +57,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
     }
 
-
-    // 사용자가 메시지를 보낼 때 처리하는 로직
     @SubscribeMessage('sendMessage')
     async handleMessage(client: Socket, payload: { roomName: string; sender: string; message: string }) {
-        // 채팅 메시지를 DB에 저장
+        // 메시지 저장 (이 부분에서 메시지가 저장되고 있는지 확인)
         const savedMessage = await this.chatService.saveMessage(payload.roomName, payload.sender, payload.message);
 
-        // Redis Pub/Sub을 통해 해당 방에 메시지 발송
+        // Redis를 통해 메시지 발행
         await this.redisService.publishMessage(payload.roomName, savedMessage.message);
 
         // 방에 있는 모든 클라이언트에게 메시지 전송
-        this.server.to(payload.roomName).emit('receiveMessage', savedMessage);
+        this.server.to(payload.roomName).emit('receiveMessage', savedMessage.message);
     }
+
 }

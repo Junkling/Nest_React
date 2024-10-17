@@ -1,5 +1,5 @@
-import {DataSource} from 'typeorm';
-import {Injectable, InternalServerErrorException} from '@nestjs/common';
+import { DataSource } from 'typeorm';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class TransactionalService {
@@ -16,7 +16,8 @@ export class TransactionalService {
             return result;
         } catch (error) {
             await queryRunner.rollbackTransaction();
-            throw new InternalServerErrorException('트랜잭션 중 오류 발생');
+            // 원래의 예외를 다시 던짐으로써 메시지를 보존
+            throw error;
         } finally {
             await queryRunner.release();
         }

@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { User } from "../types/User";
-import { Board } from "../types/Board";
-import { PageResult } from "../types/PageResult";
+import { User } from "../types/user/User";
+import { Board } from "../types/board/Board";
+import { PageResult } from "../types/pagnation/PageResult";
 
 // 토큰을 가져오는 함수 (AuthContext나 로컬 스토리지에서 토큰을 가져옵니다)
 const getToken = (): string | null => {
