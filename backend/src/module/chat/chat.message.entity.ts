@@ -1,4 +1,4 @@
-import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn} from 'typeorm';
+import {Column, Entity, ManyToOne, PrimaryGeneratedColumn} from 'typeorm';
 import {BaseTimeEntity} from "../common/base.time.entity";
 import {ChatRoom} from "./chat.room.entity";
 

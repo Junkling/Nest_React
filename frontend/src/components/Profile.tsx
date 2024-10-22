@@ -21,10 +21,10 @@ const ProfileComponent: React.FC = () => {
         fetchProfile();
     }, []);
 
-    // 채팅방으로 이동하는 함수
-    const goToChatRoom = (roomId: number, roomName: string) => {
-        navigate(`/chat/${roomId}`, { state: { roomName } }); // 채팅방으로 이동하며 roomName도 전달
+    const goToChatRoom = (roomId: number) => {
+        navigate(`/chat/${roomId}`); // roomId만 사용하여 채팅방으로 이동
     };
+
 
     return (
         <div>
@@ -46,7 +46,7 @@ const ProfileComponent: React.FC = () => {
                     {profile.chatRoomList.length > 0 ? (
                         <ul>
                             {profile.chatRoomList.map((chatRoom) => (
-                                <li key={chatRoom.roomId} onClick={() => goToChatRoom(chatRoom.roomId, chatRoom.roomName)}>
+                                <li key={chatRoom.roomId} onClick={() => goToChatRoom(chatRoom.roomId)}>
                                     {chatRoom.roomName} (ID: {chatRoom.roomId})
                                 </li>
                             ))}

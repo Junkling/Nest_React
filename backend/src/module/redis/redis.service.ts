@@ -48,18 +48,18 @@ export class RedisService {
     }
 
 // 메시지 발행 메서드 (PUBLISH)
-    async publishMessage(roomName: string, chatMessage: string) {
+    async publishMessage(roomId: string, chatMessage: string) {
         try {
             const message = JSON.stringify({ message: chatMessage });
             console.log('Publishing message:', message);
-            const result = await this.publisherClient.publish(roomName, message);
+            const result = await this.publisherClient.publish(roomId, message);
 
             // 발행된 메시지가 0개의 구독자에게 전달된 경우 (구독자가 없는 경우)
             if (result === 0) {
-                console.warn(`No subscribers found for room: ${roomName}`);
+                console.warn(`No subscribers found for room: ${roomId}`);
             }
         } catch (error) {
-            console.error(`Error publishing message to room: ${roomName}`, error);
+            console.error(`Error publishing message to room: ${roomId}`, error);
         }
     }
 }

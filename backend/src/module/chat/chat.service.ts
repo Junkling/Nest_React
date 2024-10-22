@@ -1,12 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import {Injectable, NotFoundException} from '@nestjs/common';
+import {InjectRepository} from '@nestjs/typeorm';
+import {Repository} from 'typeorm';
 import {ChatRoom} from "./chat.room.entity";
 import {ChatMessage} from "./chat.message.entity";
 import {RedisService} from "../redis/redis.service";
 import {UserChatRoom} from "./user-chat-room.entity";
 import {User} from "../users/user.entity";
-import {Transaction} from "../../db/db.utils";
+import {orElseThrow, Transaction} from "../../db/db.utils";
+import {PageRequest, toFindOption} from "../../type/pagenation/PageRequest";
+import {PageResult} from "../../type/pagenation/PageResult";
 
 @Injectable()
 export class ChatService {
@@ -18,7 +20,9 @@ export class ChatService {
         @InjectRepository(ChatMessage)
         private readonly chatMessageRepository: Repository<ChatMessage>,
         private readonly redisService: RedisService,
-    ) {}
+    ) {
+    }
+
     // 채팅방 생성 메서드
     @Transaction()
     async createChatRoom(roomName: string, sender: User, receipt: User): Promise<void> {
@@ -40,22 +44,19 @@ export class ChatService {
     }
 
 
-    async saveMessage(roomName: string, sender: string, message: string): Promise<ChatMessage> {
-        let room = await this.chatRoomRepository.findOne({ where: { roomName } });
-        if (!room) {
-            room = this.chatRoomRepository.create({ roomName });
-            await this.chatRoomRepository.save(room);
-        }
+    async saveMessage(roomId: number, sender: string, message: string): Promise<ChatMessage> {
+        const room = orElseThrow(await this.chatRoomRepository.findOne({where: {id: roomId}})
+            , () => new NotFoundException('채팅방을 찾을 수 없습니다.'));
 
-        const chatMessage = this.chatMessageRepository.create({ sender, message, room });
+        const chatMessage = this.chatMessageRepository.create({sender, message, room});
         return this.chatMessageRepository.save(chatMessage);
     }
 
-    async getMessagesByRoom(roomName: string): Promise<ChatMessage[]> {
-        const room = await this.chatRoomRepository.findOne({
-            where: { roomName },
-            relations: ['messages'],
+    async getMessagesByRoomId(roomId: number, pageReq: PageRequest): Promise<PageResult<ChatMessage>> {
+        const [chats, count] = await this.chatMessageRepository.findAndCount({
+            where: {room: {id: roomId}}
+            , ...toFindOption(pageReq)
         });
-        return room ? room.messages : [];
+        return new PageResult<ChatMessage>(chats, count, pageReq.page, chats.length);
     }
 }

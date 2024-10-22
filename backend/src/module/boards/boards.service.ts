@@ -26,10 +26,7 @@ export class BoardsService {
         console.log(`[findAll] : size = 0`)
         const boards = await this.boardRepository.find({ relations: ['user'] }); // 관계 로드
         const data = boards.map(toBoardResponse); // 엔티티를 응답 타입으로 변환
-        const page = 0;
-        const totalPages = 0;
-        const totalCount = data.length;
-        return {data, page, totalPages, totalCount};
+        return new PageResult<BoardResponse>(data, 0, 0, data.length);
     }
 
     private async findAllByPage(pageReq: PageRequest): Promise<PageResult<BoardResponse>> {
@@ -39,10 +36,7 @@ export class BoardsService {
             relations: ['user'],
         });
         const data = boards.map(toBoardResponse); // 엔티티를 응답 타입으로 변환
-        const page = pageReq.page;
-        const totalCount = count;
-        const totalPages = Math.ceil(totalCount / pageReq.size);
-        return {data, page, totalPages, totalCount};
+        return new PageResult<BoardResponse>(data, count, pageReq.page, data.length);
     }
 
     async findOne(id: number): Promise<BoardResponse> {

@@ -12,5 +12,4 @@ export abstract class BaseTimeEntity {
     @UpdateDateColumn({ type: 'timestamptz' })
     updatedAt!: Date;
 
-
 }

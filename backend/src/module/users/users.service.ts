@@ -16,7 +16,7 @@ import {
 } from "../../type/user/UserLanguageResponse";
 import {ChatRoomResponse, entityToChatRoomResponse} from "../../type/chat/ChatRoomResponse";
 import {PageRequest, toFindOption} from "../../type/pagenation/PageRequest";
-import {PageResult, toPageResult} from "../../type/pagenation/PageResult";
+import {PageResult} from "../../type/pagenation/PageResult";
 
 
 @Injectable()
@@ -44,7 +44,7 @@ export class UsersService {
                 , relations: ['boardList', 'nativeLanguages', 'wishLanguages', 'wishLanguages.language', 'nativeLanguages.language'],
             });
         const data = users.map(entityToUserLanguageResponse);
-        return toPageResult(data, count, pageReq.page, pageReq.size);
+        return new PageResult(data, count, pageReq.page, pageReq.size);
     }
 
 
