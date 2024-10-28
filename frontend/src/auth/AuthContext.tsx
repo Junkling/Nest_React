@@ -5,14 +5,15 @@ const AuthContext = createContext<any>(null);
 
 const initialState = {
     token: localStorage.getItem('token'),
+    user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') || '{}') : null, // 로컬 스토리지에서 사용자 정보 로드
 };
 
 const authReducer = (state: any, action: any) => {
     switch (action.type) {
         case 'LOGIN':
-            return { ...state, token: action.payload };
+            return { ...state, token: action.payload.token, user: action.payload.user };
         case 'LOGOUT':
-            return { ...state, token: null };
+            return { ...state, token: null, user: null };
         default:
             return state;
     }
@@ -21,13 +22,15 @@ const authReducer = (state: any, action: any) => {
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [state, dispatch] = useReducer(authReducer, initialState);
 
-    const login = (token: string) => {
+    const login = (token: string, user: any) => {
         localStorage.setItem('token', token); // 로컬 스토리지에 토큰 저장
-        dispatch({ type: 'LOGIN', payload: token }); // Context에 토큰 저장
+        localStorage.setItem('user', JSON.stringify(user)); // 로컬 스토리지에 사용자 정보 저장
+        dispatch({ type: 'LOGIN', payload: { token, user } }); // Context에 토큰과 사용자 정보 저장
     };
 
     const logout = () => {
         localStorage.removeItem('token'); // 로컬 스토리지에서 토큰 제거
+        localStorage.removeItem('user'); // 로컬 스토리지에서 사용자 정보 제거
         dispatch({ type: 'LOGOUT' });
     };
 

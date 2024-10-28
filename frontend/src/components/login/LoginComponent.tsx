@@ -22,8 +22,8 @@ const LoginComponent: React.FC = () => {
 
             const { token, userResponse } = response.data;
 
-            // 1. 토큰 저장 (AuthContext에 저장)
-            login(token); // 토큰을 Context와 로컬 스토리지에 저장
+            // 1. 토큰과 사용자 정보 저장 (AuthContext에 저장)
+            login(token, userResponse); // 토큰과 사용자 정보를 Context와 로컬 스토리지에 저장
 
             // 2. 사용자 정보 저장
             const { name, age, introduce } = userResponse;

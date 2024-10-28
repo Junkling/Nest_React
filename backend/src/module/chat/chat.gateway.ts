@@ -5,11 +5,12 @@ import {
     OnGatewayConnection,
     OnGatewayDisconnect
 } from '@nestjs/websockets';
-import {Server, Socket} from 'socket.io';
-import {ChatService} from './chat.service';
-import {Inject} from '@nestjs/common';
-import {RedisService} from "../redis/redis.service";
-import {PageRequest} from "../../type/pagenation/PageRequest";
+import { Server, Socket } from 'socket.io';
+import { ChatService } from './chat.service';
+import { Inject } from '@nestjs/common';
+import { RedisService } from '../redis/redis.service';
+import { PageRequest } from '../../type/pagenation/PageRequest';
+import * as jwt from 'jsonwebtoken'; // JWT 라이브러리 사용
 
 @WebSocketGateway({
     cors: {
@@ -26,7 +27,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     ) {}
 
     async handleConnection(client: Socket) {
-        console.log(`Client connected: ${client.id}`);
+        const token = client.handshake.query.token as string; // 쿼리 파라미터로 받은 토큰
+        try {
+            const decoded = jwt.verify(token, 'YOUR_SECRET_KEY'); // 토큰 검증
+            client.data.user = decoded; // 사용자 정보 저장
+            console.log(`Client connected: ${client.id}`);
+        } catch (error) {
+            console.error('Authentication failed:', error);
+            client.disconnect(); // 인증 실패 시 연결 해제
+        }
     }
 
     async handleDisconnect(client: Socket) {
@@ -37,23 +46,26 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @SubscribeMessage('joinRoom')
     async handleJoinRoom(client: Socket, roomId: string) {
         try {
-            // 클라이언트를 Socket.io 방에 참여시킴
             client.join(roomId);
             console.log(`Client ${client.id} joined room: ${roomId}`);
 
             // Redis Pub/Sub을 통해 방의 기존 메시지를 수신하고 실시간 동기화
             await this.redisService.subscribeToRoom(roomId, (message) => {
                 if (message) {
-                    this.server.to(roomId).emit('receiveMessage', message);
+                    const parsedMessage = JSON.parse(message);
+                    this.server.to(roomId).emit('receiveMessage', parsedMessage);
                 } else {
                     console.error(`Failed to receive message for room: ${roomId}`);
                 }
             });
 
             // 기존 메시지를 클라이언트로 전송
-            const previousMessages = await this.chatService.getMessagesByRoomId(parseInt(roomId), new PageRequest(1, 10, 'createdAt', 'DESC'));
+            const previousMessages = await this.chatService.getMessagesByRoomId(
+                parseInt(roomId),
+                new PageRequest(1, 10, 'createdAt', 'DESC')
+            );
+
             if (previousMessages) {
-                // 클라이언트로 기존 메시지 전송
                 this.server.to(client.id).emit('loadedMessages', previousMessages);
             }
 
@@ -65,10 +77,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     @SubscribeMessage('sendMessage')
-    async handleMessage(client: Socket, payload: { roomId: string; sender: string; message: string }, callback: Function) {
+    async handleMessage(client: Socket, payload: { roomId: string; message: string }, callback: Function) {
         try {
-            // 메시지 저장
-            const savedMessage = await this.chatService.saveMessage(parseInt(payload.roomId), payload.sender, payload.message);
+            const user = client.data.user;
+            if (!user) throw new Error('Unauthorized');
+
+            // 토큰에서 가져온 사용자 이름 사용
+            const savedMessage = await this.chatService.saveMessage(parseInt(payload.roomId), user.username, payload.message);
 
             // Redis를 통해 메시지 발행 (저장된 전체 메시지 객체를 발행)
             await this.redisService.publishMessage(payload.roomId, JSON.stringify(savedMessage));
@@ -76,11 +91,29 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             // 방에 있는 모든 클라이언트에게 전체 메시지 객체 전송
             this.server.to(payload.roomId).emit('receiveMessage', savedMessage);
 
-            // 클라이언트에 전송된 메시지에 대해 응답을 보냄 (Optional: 보낸 클라이언트에 확인 응답)
-            callback(savedMessage);
+            callback(savedMessage); // 클라이언트에 전송된 메시지 확인 응답
         } catch (error) {
             console.error(`Error sending message for room: ${payload.roomId}`, error);
             callback({ error: 'Failed to send message' });
+        }
+    }
+
+    @SubscribeMessage('editMessage')
+    async handleEditMessage(client: Socket, payload: { id: number; message: string }, callback: Function) {
+        try {
+            const user = client.data.user;
+            if (!user) throw new Error('Unauthorized');
+
+            // 메시지 수정 로직 (사용자 권한 체크 포함)
+            const updatedMessage = await this.chatService.updateMessage(payload.id, payload.message, user.id);
+
+            // 모든 클라이언트에 업데이트된 메시지 전송
+            this.server.to(updatedMessage.room.id.toString()).emit('messageUpdated', updatedMessage);
+
+            callback(updatedMessage); // 수정된 메시지를 클라이언트로 응답
+        } catch (error) {
+            console.error(`Failed to edit message: ${error}`);
+            callback({ error: 'Failed to edit message' });
         }
     }
 }

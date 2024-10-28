@@ -1,93 +1,124 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useParams } from 'react-router-dom';
-import io from 'socket.io-client';
-import {PageResult} from "../../types/pagnation/PageResult";
-import {ChatMessage} from "../../types/chat/ChatMessage";
+import React, {useEffect, useState, useRef} from 'react';
+import {useParams} from 'react-router-dom';
+import io, {Socket} from 'socket.io-client';
+import {useAuth} from '../../auth/AuthContext';
 
-
-const socket = io('http://localhost:4000'); // 서버의 소켓 주소와 동일해야 합니다.
+interface ChatMessage {
+    id: number;
+    sender: string;
+    message: string;
+    createdAt: string;
+}
 
 const ChatRoomComponent: React.FC = () => {
-    const { roomId } = useParams<{ roomId: string }>();
+    const {roomId} = useParams<{ roomId: string }>();
+    const {token, user} = useAuth(); // AuthContext에서 토큰 가져오기
     const [message, setMessage] = useState('');
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+    const [editingMessageId, setEditingMessageId] = useState<number | null>(null); // 수정 중인 메시지 ID
+    const [editMessageText, setEditMessageText] = useState(''); // 수정 중인 메시지 내용
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
+    const [socket, setSocket] = useState<Socket | null>(null); // WebSocket 인스턴스 저장
 
     useEffect(() => {
-        if (!roomId) return;
+        if (!roomId || !token) return;
+
+        // WebSocket 연결 시 토큰을 쿼리 파라미터로 전달
+        const newSocket = io('http://localhost:4000', {
+            query: {token}, // 토큰을 포함해 WebSocket 연결 설정
+        });
+
+        setSocket(newSocket);
 
         // 방에 입장
-        socket.emit('joinRoom', roomId);
+        newSocket.emit('joinRoom', roomId);
 
         // 이전 대화 내역 수신
-        socket.on('loadedMessages', (previousMessages: PageResult<ChatMessage>) => {
-            const sortedMessages = previousMessages.data.sort(
-                (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-            );
-            setChatMessages(sortedMessages);
+        newSocket.on('loadedMessages', (previousMessages) => {
+            setChatMessages(previousMessages.data);
             scrollToBottom();
         });
 
         // 서버로부터 실시간 메시지 수신
-        socket.on('receiveMessage', (msg: ChatMessage) => {
-            setChatMessages((prevMessages) => [...prevMessages, msg]); // 새 메시지를 아래로 추가
+        newSocket.on('receiveMessage', (msg: ChatMessage) => {
+            setChatMessages((prevMessages) => [...prevMessages, msg]);
             scrollToBottom();
         });
 
+        // 수정된 메시지 수신
+        newSocket.on('messageUpdated', (updatedMessage: ChatMessage) => {
+            setChatMessages((prevMessages) =>
+                prevMessages.map((msg) =>
+                    msg.id === updatedMessage.id ? updatedMessage : msg
+                )
+            );
+        });
+
+        // 컴포넌트 언마운트 시 소켓 해제
         return () => {
-            socket.emit('leaveRoom', roomId);
-            socket.off();
+            newSocket.emit('leaveRoom', roomId);
+            newSocket.off();
+            newSocket.disconnect();
         };
-    }, [roomId]);
+    }, [roomId, token]);
 
-    // 메시지 전송
     const sendMessage = () => {
-        if (message.trim()) {
-            const newMessage = {
-                roomId,
-                // Todo : 여기서 상태 관리해서 유저정보 넣어줘야 함
-                sender: 'user1', // 실제 사용자 이름 또는 ID 사용
-                message,
-            };
+        if (message.trim() && socket) {
+            const newMessage = {roomId, sender: user.name, message};
+            socket.emit('sendMessage', newMessage);
+            setMessage('');
+        }
+    };
 
-            // 서버에 메시지 전송
-            socket.emit('sendMessage', newMessage, (response: ChatMessage) => {
-                // 서버로부터 전송된 메시지를 받아 클라이언트에 추가
-                if (response) {
-                    setChatMessages((prevMessages) => [...prevMessages, response]);
-                    scrollToBottom();
-                }
-            });
+    const editMessage = (msg: ChatMessage) => {
+        setEditingMessageId(msg.id);
+        setEditMessageText(msg.message);
+    };
 
-            setMessage(''); // 입력창 초기화
+    const saveEditedMessage = () => {
+        if (editingMessageId && editMessageText.trim() && socket) {
+            socket.emit('editMessage', {id: editingMessageId, message: editMessageText});
+            setEditingMessageId(null);
+            setEditMessageText('');
         }
     };
 
     const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
-
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return isNaN(date.getTime()) ? 'N/A' : date.toLocaleString();
+        messagesEndRef.current?.scrollIntoView({behavior: 'smooth'});
     };
 
     return (
         <div>
-            <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+            <div style={{maxHeight: '300px', overflowY: 'auto'}}>
                 {chatMessages.length > 0 ? (
                     <ul>
                         {chatMessages.map((msg) => (
                             <li key={msg.id}>
-                                <strong>{msg.sender}:</strong> {msg.message} <br />
-                                <small>{formatDate(msg.createdAt)}</small>
+                                <strong>{msg.sender}:</strong>
+                                {editingMessageId === msg.id ? (
+                                    <>
+                                        <input
+                                            type="text"
+                                            value={editMessageText}
+                                            onChange={(e) => setEditMessageText(e.target.value)}
+                                        />
+                                        <button onClick={saveEditedMessage}>Save</button>
+                                    </>
+                                ) : (
+                                    <>
+                                        {msg.message}
+                                        <button onClick={() => editMessage(msg)}>Edit</button>
+                                    </>
+                                )}
+                                <br/>
+                                <small>{new Date(msg.createdAt).toLocaleString()}</small>
                             </li>
                         ))}
                     </ul>
                 ) : (
                     <p>No messages yet...</p>
                 )}
-                <div ref={messagesEndRef} />
+                <div ref={messagesEndRef}/>
             </div>
             <input
                 type="text"

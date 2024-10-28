@@ -1,4 +1,4 @@
-import {CreateDateColumn, PrimaryGeneratedColumn, UpdateDateColumn} from 'typeorm';
+import {Column, CreateDateColumn, PrimaryGeneratedColumn, UpdateDateColumn} from 'typeorm';
 
 export abstract class BaseTimeEntity {
     @PrimaryGeneratedColumn()
@@ -12,4 +12,11 @@ export abstract class BaseTimeEntity {
     @UpdateDateColumn({ type: 'timestamptz' })
     updatedAt!: Date;
 
+    // 생성한 사용자 ID (숫자 타입)
+    @Column({ type: 'int', nullable: true })
+    createdBy?: number;
+
+    // 수정한 사용자 ID (숫자 타입)
+    @Column({ type: 'int', nullable: true })
+    updatedBy?: number;
 }

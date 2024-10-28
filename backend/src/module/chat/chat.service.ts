@@ -59,4 +59,14 @@ export class ChatService {
         });
         return new PageResult<ChatMessage>(chats, count, pageReq.page, chats.length);
     }
+
+    async updateMessage(id: number, newMessage: string, userId: number): Promise<ChatMessage> {
+        const message = orElseThrow(await this.chatMessageRepository.findOne({where: {id}}), () => new NotFoundException('메시지를 찾을 수 없습니다.'));
+
+        // 여기에서 권한 체크 로직 추가 (예: 작성자 확인)
+        message.message = newMessage;
+        message.updatedBy = userId;
+        await this.chatMessageRepository.save(message);
+        return message;
+    }
 }
